@@ -14,7 +14,7 @@ test('dashboard loads and displays initial model values', async ({ page }) => {
 test('sliders update values and calculated metrics', async ({ page }) => {
   await page.goto('/');
   const initial = await page.locator('#energy').textContent();
-  await page.locator('#solar').fill('80');
+  await page.locator('#solar').evaluate((element) => { element.value = '80'; element.dispatchEvent(new Event('input', { bubbles: true })); });
   await expect(page.locator('#solarVal')).toHaveText('80 %');
   await expect(page.locator('#energy')).not.toHaveText(initial);
 });
