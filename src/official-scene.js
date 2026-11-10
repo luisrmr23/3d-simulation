@@ -1,10 +1,11 @@
 // Official 3D building data from the City of Fürth Geoportal.
-// The service is a public ArcGIS I3S SceneServer (LoDmax buildings).
+// Load the public ArcGIS I3S SceneServer only when the user switches to this view.
 const toggle = document.getElementById('official3dToggle');
 const fallback = document.getElementById('officialSceneStatus');
 const canvas = document.getElementById('city');
 const sceneContainer = document.getElementById('officialCityScene');
-let sceneView;
+let sceneView = null;
+let requested = false;
 
 function showStatus(message) {
   if (fallback) {
@@ -22,17 +23,16 @@ function setOfficialMode(enabled) {
   if (enabled && sceneView) sceneView.resize();
 }
 
-if (toggle) {
-  toggle.addEventListener('click', () => {
-    const enabled = toggle.getAttribute('aria-pressed') !== 'true';
-    setOfficialMode(enabled);
-    if (enabled && !sceneView) showStatus('Das amtliche 3D-Stadtmodell wird geladen …');
-  });
-}
+function loadOfficialScene() {
+  if (requested) return;
+  requested = true;
+  showStatus('Das amtliche 3D-Stadtmodell wird geladen …');
 
-if (!window.require) {
-  showStatus('Die Esri-3D-Bibliothek konnte nicht geladen werden. Prüfe deine Internetverbindung.');
-} else {
+  if (!window.require) {
+    showStatus('Die Esri-3D-Bibliothek konnte nicht geladen werden. Prüfe deine Internetverbindung.');
+    return;
+  }
+
   window.require([
     'esri/Map',
     'esri/views/SceneView',
@@ -75,19 +75,25 @@ if (!window.require) {
         console.error('Amtliches 3D-Stadtmodell konnte nicht geladen werden:', error);
         showStatus('Das amtliche 3D-Stadtmodell ist momentan nicht erreichbar. Die schematische Simulation bleibt verfügbar.');
       });
-      const reset = document.getElementById('resetCamera');
-      reset?.addEventListener('click', () => {
-        if (toggle.getAttribute('aria-pressed') === 'true') {
-          sceneView.goTo({
-            position: { longitude: 10.99, latitude: 49.477, z: 1900 },
-            tilt: 65,
-            heading: 20
-          }).catch(() => {});
-        }
-      });
     } catch (error) {
-      console.error(error);
+      console.error('Fehler beim Initialisieren des amtlichen 3D-Stadtmodells:', error);
       showStatus('Das amtliche 3D-Stadtmodell konnte nicht initialisiert werden.');
     }
   });
 }
+
+toggle?.addEventListener('click', () => {
+  const enabled = toggle.getAttribute('aria-pressed') !== 'true';
+  setOfficialMode(enabled);
+  if (enabled) loadOfficialScene();
+});
+
+document.getElementById('resetCamera')?.addEventListener('click', () => {
+  if (toggle?.getAttribute('aria-pressed') === 'true' && sceneView) {
+    sceneView.goTo({
+      position: { longitude: 10.99, latitude: 49.477, z: 1900 },
+      tilt: 65,
+      heading: 20
+    }).catch(() => {});
+  }
+});
