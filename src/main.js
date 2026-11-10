@@ -284,6 +284,8 @@ function createCity() {
 }
 
 function updateCityVisuals() {
+  $('networkToggle').classList.toggle('active', networkOn);
+  $('heatToggle').classList.toggle('active', heatOn);
   if (!cityView) return;
   const metrics = calculateMetrics(state);
   cityView.networkLines.forEach((line) => { line.visible = networkOn; });
@@ -301,8 +303,6 @@ function updateCityVisuals() {
     }
     building.material.color.copy(base);
   });
-  $('networkToggle').classList.toggle('active', networkOn);
-  $('heatToggle').classList.toggle('active', heatOn);
 }
 
 try {
