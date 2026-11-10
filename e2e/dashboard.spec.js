@@ -21,7 +21,7 @@ test('sliders update values and calculated metrics', async ({ page }) => {
 
 test('scenarios load and reset restores the initial values', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: '2040' }).click();
+  await page.getByRole('button', { name: '2040', exact: true }).click();
   await expect(page.locator('#solar')).toHaveValue('72');
   await expect(page.locator('#green')).toHaveValue('70');
   await page.getByRole('button', { name: 'Zurücksetzen' }).click();
