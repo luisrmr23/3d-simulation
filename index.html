@@ -34,7 +34,7 @@
     .network-note{font-size:10px;line-height:1.55;color:#aebeb6;background:#1a282a;border-radius:9px;padding:11px}.network-note b{color:var(--blue);font-weight:600}
     .actions{display:flex;gap:7px;margin-top:13px}.primary{flex:1;background:var(--lime);color:#18251d;border:0;border-radius:8px;padding:11px 9px;font-size:10px;font-weight:800}.secondary{background:#203033;border:1px solid #405255;color:#d5e0d9;border-radius:8px;padding:10px;font-size:10px}
     .footnote{color:#738781;font-size:8px;line-height:1.55;margin-top:16px}
-    .toast{position:absolute;left:50%;bottom:85px;transform:translateX(-50%);background:#1c3028;border:1px solid #5e916e;border-radius:9px;padding:10px 15px;color:#dff5df;font-size:11px;z-index:5;opacity:0;transition:opacity .2s;pointer-events:none}.toast.show{opacity:1}
+    .toast{position:absolute;left:50%;bottom:85px;transform:translateX(-50%);background:#1c3028;border:1px solid #5e916e;border-radius:9px;padding:10px 15px;color:#dff5df;font-size:11px;z-index:5;opacity:0;transition:opacity .2s;pointer-events:none}.toast.show{opacity:1}.city-error{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);max-width:360px;padding:14px 16px;border:1px solid #a97853;border-radius:10px;background:#2b241e;color:#ffe0c2;font-size:12px;line-height:1.5}.city-error[hidden]{display:none}
     @media(max-width:900px){main{grid-template-columns:1fr}.stage{min-height:62vh}aside{height:auto;border-left:0;border-top:1px solid var(--line)}.app{grid-template-rows:60px 1fr}.top-right .hide-mobile{display:none}}
     @media(max-width:520px){header{padding:0 14px}.brand strong{font-size:10px}.top-right{gap:8px}.map-title{left:17px;top:17px}.map-title p{max-width:245px;font-size:10px}.map-controls{right:12px;top:12px}.map-legend{left:12px;bottom:12px;gap:9px;padding:9px}.map-hint{display:none}aside{padding:16px 14px}}
   </style>
@@ -47,7 +47,7 @@
   </header>
   <main>
     <section class="stage">
-      <canvas id="city"></canvas>
+      <canvas id="city" aria-label="Interaktive schematische 3D-Stadtansicht"></canvas><div id="cityError" class="city-error" role="status" hidden></div>
       <div class="map-title"><div class="eyebrow">Digitaler Stadtorganismus · Mittelfranken</div><h1>Eine Stadt.<br>Ein Kreislauf.</h1><p>Gestalte ein regeneratives Fürth und beobachte, wie Energie, Wasser, Grün und Mobilität zusammenwirken.</p></div>
       <div class="map-controls"><button class="chip active" id="networkToggle">◉ Netzwerk</button><button class="chip" id="heatToggle">◉ Wärmebild</button><button class="chip" id="resetCamera">↗ Ansicht</button></div>
       <div class="map-legend"><span class="legend-item"><i class="dot" style="background:#e8c86e"></i>Energie</span><span class="legend-item"><i class="dot" style="background:#65bfe4"></i>Wasser</span><span class="legend-item"><i class="dot" style="background:#8dc58d"></i>Grünräume</span><span class="legend-item"><i class="dot" style="background:#d59ae8"></i>Daten</span></div>
@@ -92,135 +92,12 @@
           <div class="metric"><small>Mobilität ohne Auto</small><strong id="mobility">60</strong><em>%</em></div>
         </div>
         <div class="actions"><button class="primary" id="optimize">✦ Optimiere Fürth 2040</button><button class="secondary" id="reset">Zurücksetzen</button></div>
-        <div class="network-note" id="recommendation" style="margin-top:12px"><b>Netzwerk-Impuls</b><br>Erhöhe den Grünflächen-Ausbau, um die modellierte Wärmebelastung zu senken. Mehr entsiegelte Flächen unterstützen gleichzeitig die Regenwasserversickerung.</div>
+        <div class="network-note" style="margin-top:12px"><b>Netzwerk-Impuls</b><br><span id="recommendationText">Erhöhe den Grünflächen-Ausbau, um die modellierte Wärmebelastung zu senken.</span></div>
       </div>
       <p class="footnote">* Modellierte Beispielwerte, keine Messdaten oder Prognosen. Die 3D-Geometrie ist schematisch und nicht grundstücksgenau. Alle Kennzahlen beruhen auf vereinfachten, transparenten Zusammenhängen. Für wissenschaftliche Aussagen müssen lokale Geodaten, Messwerte und geprüfte Kostenansätze ergänzt werden.</p>
     </aside>
   </main>
 </div>
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-
-const canvas=document.querySelector('#city');
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-const scene=new THREE.Scene();scene.fog=new THREE.Fog(0x182a2a,32,78);
-const camera=new THREE.PerspectiveCamera(42,1,.1,150);camera.position.set(22,25,30);
-const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.maxPolarAngle=Math.PI/2.08;controls.minDistance=12;controls.maxDistance=62;controls.target.set(0,0,0);
-scene.add(new THREE.HemisphereLight(0xc7e4d8,0x26372f,2.1));
-const sun=new THREE.DirectionalLight(0xffe2b4,2.3);sun.position.set(-12,24,16);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
-const groundMat=new THREE.MeshStandardMaterial({color:0x263a33,roughness:1});
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(58,48),groundMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.15;ground.receiveShadow=true;scene.add(ground);
-const city=new THREE.Group();scene.add(city);
-const buildingMeshes=[],greenMeshes=[],pvMeshes=[],waterMeshes=[];
-const mat=(color,roughness=.86)=>new THREE.MeshStandardMaterial({color,roughness});
-const buildingMats=[mat(0x9caa9e),mat(0xb8b4a3),mat(0x778b87),mat(0xc5c0ae),mat(0x879a90)];
-const roofMat=mat(0x455b54),parkMat=mat(0x416b50),treeMat=mat(0x78a878),trunkMat=mat(0x735b42);
-function box(w,h,d,material,x,y,z,parent=city){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y+h/2,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
-function addTree(x,z,s=1){const g=new THREE.Group();g.position.set(x,0,z);const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.09*s,.13*s,.8*s,6),trunkMat);trunk.position.y=.4*s;g.add(trunk);const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(.48*s,1),treeMat.clone());crown.position.y=1.05*s;crown.castShadow=true;g.add(crown);city.add(g);greenMeshes.push(crown);return g}
-function road(points,width=1.15){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(p[0],.015,p[1])));const geo=new THREE.TubeGeometry(curve,100,width/2,8,false);const mesh=new THREE.Mesh(geo,mat(0x53615b));city.add(mesh);return mesh}
-// Rednitz and Pegnitz converge into the Regnitz: intentionally schematic, not surveyed geometry.
-const riverMat=new THREE.MeshStandardMaterial({color:0x397f9a,roughness:.25,metalness:.12,transparent:true,opacity:.92});
-function river(points,width){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(p[0],.025,p[1])));const m=new THREE.Mesh(new THREE.TubeGeometry(curve,100,width/2,12,false),riverMat);city.add(m);waterMeshes.push(m)}
-river([[-22,-15],[-17,-8],[-13,-2],[-10,5],[-7,15]],2.1);
-river([[20,-15],[14,-9],[9,-4],[2,1],[-7,15]],1.45);
-river([[-7,15],[-1,18],[8,20],[19,20]],1.7);
-road([[-25,-4],[-15,-3],[-5,-2],[5,-1],[15,2],[25,4]],.65);
-road([[-18,14],[-12,8],[-5,4],[2,0],[10,-6],[18,-14]],.52);
-road([[-21,-14],[-12,-12],[-3,-10],[8,-10],[19,-8]],.5);
-road([[-2,-22],[-1,-12],[0,-3],[2,7],[4,18]],.4);
-const districts=[
- {name:'Hardhöhe',x:-14,z:-8,count:38,scale:1.0},
- {name:'Innenstadt',x:0,z:1,count:52,scale:.78},
- {name:'Südstadt',x:11,z:-9,count:38,scale:1.05},
- {name:'Modellquartier',x:13,z:11,count:28,scale:.86},
- {name:'Grün- und Flussräume',x:-13,z:12,count:15,scale:1.25}
-];
-let seed=17;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}
-districts.forEach((d,di)=>{
- const label=document.createElement('div');
- for(let i=0;i<d.count;i++){
-  const x=d.x+(rnd()-.5)*10*d.scale,z=d.z+(rnd()-.5)*8*d.scale;
-  if(Math.abs(x)<7&&z>8)continue;
-  const w=.55+rnd()*.85,h=1+rnd()*(di===1?4.2:3.2),dep=.6+rnd()*.9;
-  const b=box(w,h,dep,buildingMats[Math.floor(rnd()*buildingMats.length)],x,0,z);
-  b.userData={district:d.name};buildingMeshes.push(b);
-  const roof=new THREE.Mesh(new THREE.BoxGeometry(w*.92,.12,dep*.92),roofMat);roof.position.set(x,h+.06,z);city.add(roof);b.userData.roof=roof;
-  if(rnd()>.73){addTree(x+(rnd()-.5)*1.5,z+(rnd()-.5)*1.5,.6+rnd()*.45)}
- }
- const marker=new THREE.Mesh(new THREE.CircleGeometry(1.4,32),new THREE.MeshBasicMaterial({color:0x6e9b77,transparent:true,opacity:.12,side:THREE.DoubleSide}));marker.rotation.x=-Math.PI/2;marker.position.set(d.x,.01,d.z);city.add(marker);
- const spriteCanvas=document.createElement('canvas');spriteCanvas.width=512;spriteCanvas.height=96;const ctx=spriteCanvas.getContext('2d');ctx.font='bold 42px Manrope';ctx.fillStyle='#dcece1';ctx.fillText(d.name,12,62);
- const texture=new THREE.CanvasTexture(spriteCanvas);const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthWrite:false}));sprite.position.set(d.x,4.7,d.z);sprite.scale.set(5.8,1.1,1);city.add(sprite);
-});
-for(let i=0;i<40;i++){const x=(rnd()-.5)*46,z=(rnd()-.5)*36;if(Math.abs(x)>7||Math.abs(z)>9)addTree(x,z,.65+rnd()*.55)}
-// Parkland and civic landmarks
-const park= new THREE.Mesh(new THREE.CircleGeometry(4.4,40),parkMat);park.rotation.x=-Math.PI/2;park.position.set(-18,.01,13);park.scale.set(1.25,.8,1);city.add(park);
-box(2.2,2.5,1.8,mat(0xd0c5a9),-1.5,0,3.5);
-box(1.4,3.4,1.4,mat(0xc5b99d),-1.5,0,3.5).position.y=2.1;
-const pvMaterial=new THREE.MeshStandardMaterial({color:0x3b83a0,metalness:.45,roughness:.35,emissive:0x123447});
-function makeNetworkLine(a,b,color){const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(a[0],.45,a[1]),new THREE.Vector3((a[0]+b[0])/2,1.1,(a[1]+b[1])/2),new THREE.Vector3(b[0],.45,b[1])]);const m=new THREE.Mesh(new THREE.TubeGeometry(curve,32,.035,5,false),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.7}));city.add(m);return m}
-const networkLines=[];for(let i=0;i<districts.length-1;i++){networkLines.push(makeNetworkLine([districts[i].x,districts[i].z],[districts[i+1].x,districts[i+1].z],0xe8c86e));networkLines.push(makeNetworkLine([districts[i].x,districts[i].z],[districts[(i+2)%districts.length].x,districts[(i+2)%districts.length].z],0x65bfe4))}
-let networkOn=true,heatOn=false;
-function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
-window.addEventListener('resize',resize);resize();
-const defaults={solar:24,retrofit:18,permeable:12,storage:20,green:20,transit:28,bike:32};
-let state={...defaults};
-const ids=Object.keys(defaults);
-function calc(s){
- const energy= Math.round(0.75+s.solar*.72);
- const heating=Math.max(28,Math.round(100-s.retrofit*.55-solarBonus(s)));
- function solarBonus(v){return v.solar*.1}
- const retention=Math.min(96,Math.round(10+s.permeable*.48+s.storage*.34));
- const heat=Math.round(36-s.green*.085-s.permeable*.025);
- const green=Math.round(12+s.green*.72);
- const mobility=Math.min(95,s.transit+s.bike);
- const index=Math.round(Math.max(0,Math.min(100,18+s.solar*.17+s.retrofit*.12+s.permeable*.11+s.storage*.08+s.green*.2+mobility*.12)));
- return {energy,heating,retention,heat,green,mobility,index};
-}
-function recommendation(m){let lines=[];if(m.heat>31)lines.push('Die modellierte Wärmebelastung ist erhöht. Mehr Bäume, entsiegelte Flächen und Schattenräume können gemeinsam helfen.');if(m.retention<45)lines.push('Der Regenwasserrückhalt ist noch gering. Prüfe zusätzliche Speicher und Versickerungsflächen.');if(m.energy<45)lines.push('Die lokale PV-Produktion bleibt niedrig. Prüfe geeignete Dächer und lokale Energiegemeinschaften.');if(m.mobility<65)lines.push('Der Anteil aktiver Mobilität und ÖPNV kann steigen, wenn sichere Wege und gute Anschlüsse ausgebaut werden.');if(!lines.length)lines.push('Das Modell zeigt ein ausgewogeneres Ressourcensystem. Prüfe nun Kosten, Flächenkonflikte und soziale Verteilung.');return lines[0]}
-function update(){
- const m=calc(state);
- ids.forEach(id=>document.getElementById(id+'Val').textContent=state[id]+' %');
- document.getElementById('energy').textContent=m.energy;
- document.getElementById('heating').textContent=m.heating;
- document.getElementById('water').textContent=m.retention;
- document.getElementById('heat').textContent=m.heat;
- document.getElementById('greenMetric').textContent=m.green;
- document.getElementById('mobility').textContent=m.mobility;
- document.getElementById('indexValue').textContent=m.index;
- document.getElementById('indexBar').style.width=m.index+'%';
- document.getElementById('recommendation').innerHTML='<b>Netzwerk-Impuls</b><br>'+recommendation(m);
- // Visual changes: rooftop PV, added canopy, and a heat tint on buildings.
- buildingMeshes.forEach((b,i)=>{
-  const hasPV=(i%100)<state.solar;
-  if(!b.userData.pv&&hasPV){const roof=new THREE.Mesh(new THREE.BoxGeometry(.32,.045,.42),pvMaterial);roof.position.set(b.position.x,b.position.y+b.geometry.parameters.height/2+.09,b.position.z);city.add(roof);b.userData.pv=roof}
-  if(b.userData.pv)b.userData.pv.visible=hasPV;
-  const hot=Math.max(0,(m.heat-27)/12);
-  b.material.color.set(heatOn?new THREE.Color().setHSL(.02+(.28*(1-hot)),.55,.43):new THREE.Color(buildingMats[i%buildingMats.length].color));
- });
- greenMeshes.forEach((g,i)=>{g.visible=i<Math.round(greenMeshes.length*(.35+state.green/100*1.4))});
- networkLines.forEach(l=>l.visible=networkOn);
- document.getElementById('heatToggle').classList.toggle('active',heatOn);
- document.getElementById('networkToggle').classList.toggle('active',networkOn);
-}
-ids.forEach(id=>document.getElementById(id).addEventListener('input',e=>{state[id]=Number(e.target.value);document.querySelectorAll('.scenario').forEach(b=>b.classList.remove('active'));update()}));
-const scenarios={today:{...defaults},2030:{solar:42,retrofit:35,permeable:28,storage:40,green:38,transit:35,bike:42},2040:{solar:72,retrofit:68,permeable:58,storage:72,green:70,transit:42,bike:48}};
-function loadScenario(name){state={...scenarios[name]};ids.forEach(id=>document.getElementById(id).value=state[id]);document.querySelectorAll('.scenario').forEach(b=>b.classList.toggle('active',b.dataset.scenario===name));update();toast('Szenario '+name+' geladen')}
-document.querySelectorAll('.scenario').forEach(b=>b.addEventListener('click',()=>loadScenario(b.dataset.scenario)));
-document.getElementById('networkToggle').addEventListener('click',()=>{networkOn=!networkOn;update()});
-document.getElementById('heatToggle').addEventListener('click',()=>{heatOn=!heatOn;update()});
-document.getElementById('resetCamera').addEventListener('click',()=>{camera.position.set(22,25,30);controls.target.set(0,0,0);controls.update()});
-document.getElementById('reset').addEventListener('click',()=>{state={...defaults};ids.forEach(id=>document.getElementById(id).value=state[id]);document.querySelectorAll('.scenario').forEach(b=>b.classList.toggle('active',b.dataset.scenario==='today'));update();toast('Ausgangswerte wiederhergestellt')});
-document.getElementById('optimize').addEventListener('click',()=>{state={solar:68,retrofit:62,permeable:56,storage:64,green:72,transit:40,bike:46};ids.forEach(id=>document.getElementById(id).value=state[id]);document.querySelectorAll('.scenario').forEach(b=>b.classList.remove('active'));update();toast('Modelloptimierung angewendet – Budget und Zielkonflikte noch nicht berücksichtigt')});
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
-update();
-const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const t=clock.getElapsedTime();networkLines.forEach((l,i)=>{l.material.opacity=networkOn?.48+Math.sin(t*2+i)*.18:0});controls.update();renderer.render(scene,camera)}
-animate();
-</script>
+<script type="module" src="/src/main.js"></script>
 </body>
 </html>
