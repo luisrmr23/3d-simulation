@@ -1,43 +1,45 @@
 # Fürth 2040 – Die regenerative Stadt
 
-Ein browserbasierter 3D-Prototyp für das Projekt **FÜRTH 2040 – DIE REGENERATIVE STADT**.
+Ein browserbasierter Prototyp für das Projekt **FÜRTH 2040 – DIE REGENERATIVE STADT**. Der aktuelle Schwerpunkt liegt ausdrücklich auf stabilen Grundfunktionen und automatisierten Tests – noch nicht auf einer realitätsgetreuen 3D-Stadt.
 
-## Starten
+## Lokal starten
 
-Die Anwendung liegt vollständig in `index.html`. Öffne die Datei über einen lokalen Webserver, zum Beispiel mit VS Code Live Server oder:
+Voraussetzung: Node.js 20 oder neuer.
 
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
 
-Rufe anschließend `http://localhost:8000` im Browser auf. Für die 3D-Darstellung wird Three.js als ES-Modul von jsDelivr geladen; daher ist beim ersten Start eine Internetverbindung nötig.
+Vite zeigt die lokale Adresse im Terminal an.
 
-## Enthaltene Funktionen
+## Tests ausführen
 
-- Interaktive 3D-Stadtansicht mit Orbit-Steuerung, Zoom und schematischen Stadtbereichen
-- Schematische Flussläufe für Rednitz, Pegnitz und Regnitz
-- Ein-/Ausschalten von Ressourcenverbindungen und Wärmebild
-- Regler für Photovoltaik, Gebäudesanierung, Entsiegelung, Regenwasserspeicher, Grünflächen und Mobilitätsanteile
-- Sofortige Neuberechnung der Modellkennzahlen
-- Vorgefertigte Szenarien „Heute“, „2030“ und „2040“
-- Zurücksetzen und ein einfacher Optimierungs-Demonstrator
+```bash
+npm test          # Modell- und Berechnungslogik
+npm run build     # Produktions-Build
+npx playwright install chromium
+npm run test:e2e  # Browser-Interaktionen
+```
 
-## Wissenschaftliche Einordnung
+GitHub Actions führt Modelltests, Build und Browser-Tests bei Pushes und Pull Requests automatisch aus.
 
-Die 3D-Geometrie ist eine vereinfachte, nicht grundstücksgenaue Modellstadt. Die dargestellten Werte sind illustrative Modellwerte und keine amtlichen Messdaten, Prognosen oder Kostenschätzungen. Die Berechnungslogik ist bewusst einfach gehalten und muss für wissenschaftliche Verwendung durch geprüfte lokale Daten, dokumentierte Parameter, Unsicherheitsbereiche und validierte Teilmodelle ersetzt beziehungsweise erweitert werden.
+## Aktueller Funktionsumfang
 
-## Nächste Ausbaustufen
+- Regler für Photovoltaik, Sanierung, Entsiegelung, Regenwasserspeicher, Grünflächen und Mobilität
+- Drei Szenarien (Heute, 2030, 2040), Zurücksetzen und Optimierungs-Demonstrator
+- Live-Berechnung der Modellkennzahlen und Handlungshinweis
+- Schematische Three.js-Ansicht mit Zoom/Drehung, Netzwerk, PV-Dachflächen und Wärmebild
+- 3D-Ansicht fällt bei fehlender WebGL-Unterstützung aus, ohne die Modellregler zu blockieren
 
-1. Verlässliche Geodaten und echte Stadtteilgrenzen integrieren
-2. Simulationsmodelle für Energie, Wasser, Hitze und Mobilität fachlich vertiefen
-3. Stadtteil-Dashboards und Ressourcenbilanzen ergänzen
-4. Szenarien speichern, vergleichen und exportieren
-5. Regenerationsbudget mit nachvollziehbarer sozialer Verteilungslogik implementieren
-6. Daten- und Quellenpanel sowie Präsentationsmodus ergänzen
+## Fachliche Grenzen
 
-## Technologie
+Die Stadtgeometrie und alle Kennzahlen sind Platzhalter bzw. illustrative Modellwerte. Sie sind keine amtlichen Messdaten, Prognosen, geprüften Energie- oder Klimabilanzen. Die Flussläufe und Stadtteilpositionen sind schematisch und nicht vermessen. Die Modellformeln sind bewusst einfach und müssen fachlich kalibriert und mit lokalen Daten belegt werden, bevor Ergebnisse als Aussagen über Fürth verwendet werden.
 
-- Three.js
-- JavaScript ES Modules
-- HTML und CSS
+## Nächste Schritte – erst nach bestandenen Tests
 
+1. Stabilität der Oberfläche und Berechnungen verifizieren
+2. Interaktionen und Szenarien automatisiert testen
+3. Bedienbarkeit auf Desktop und Smartphone prüfen
+4. Fehler und Regressionen beheben
+5. Erst danach reale Geodaten und belastbare Teilmodelle integrieren
