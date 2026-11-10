@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#101a1d">
   <title>Fürth 2040 – Die regenerative Stadt</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://js.arcgis.com/4.32/esri/themes/dark/main.css">\n  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -17,7 +17,7 @@
     .brand strong{font-size:13px;letter-spacing:.12em}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.16em;margin-top:3px}
     .top-right{display:flex;align-items:center;gap:16px;color:var(--muted);font-size:11px}.live{color:var(--green);font-family:'DM Mono';font-size:10px}.live:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:7px;box-shadow:0 0 9px var(--green)}
     main{display:grid;grid-template-columns:minmax(0,1fr) 365px;min-height:0}.stage{position:relative;min-height:calc(100vh - 68px);overflow:hidden;background:radial-gradient(ellipse at 48% 40%,#263c37 0%,#182a2a 45%,#10191c 100%)}
-    #city{position:absolute;inset:0;width:100%;height:100%;display:block}.stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(9,18,20,.1),transparent 30%,rgba(9,18,20,.18))}
+    #city{position:absolute;inset:0;width:100%;height:100%;display:block}.official-city-scene{position:absolute;inset:0;width:100%;height:100%;display:none;z-index:0}.official-city-status{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;max-width:340px;padding:12px 15px;border:1px solid #6c8c7a;border-radius:10px;background:#14211feF;color:#e4f0e8;font-size:11px;line-height:1.5}.official-city-status[hidden]{display:none}.stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(9,18,20,.1),transparent 30%,rgba(9,18,20,.18))}
     .map-title{position:absolute;left:28px;top:25px;z-index:1}.eyebrow{font:10px 'DM Mono';letter-spacing:.18em;color:var(--green);text-transform:uppercase}.map-title h1{font-size:clamp(25px,3vw,42px);line-height:1.04;margin:10px 0 8px;letter-spacing:-.055em}.map-title p{font-size:12px;color:#a9b9b2;margin:0;max-width:330px;line-height:1.6}
     .map-controls{position:absolute;right:22px;top:22px;z-index:2;display:flex;gap:7px}.chip,.ghost{background:rgba(18,30,31,.86);border:1px solid #49605b;color:#dce8e1;border-radius:9px;padding:9px 12px;font-size:10px;backdrop-filter:blur(12px)}.chip.active{background:#294536;border-color:#6caa7b;color:#c8f4c6}
     .map-legend{position:absolute;left:25px;bottom:24px;z-index:2;background:rgba(15,25,26,.84);border:1px solid #35494a;border-radius:12px;padding:12px 14px;display:flex;gap:14px;flex-wrap:wrap;backdrop-filter:blur(12px)}.legend-item{font-size:9px;color:#b6c5bd;display:flex;align-items:center;gap:6px}.dot{width:7px;height:7px;border-radius:50%}
@@ -47,16 +47,16 @@
   </header>
   <main>
     <section class="stage">
-      <canvas id="city" aria-label="Interaktive schematische 3D-Stadtansicht"></canvas><div id="cityError" class="city-error" role="status" hidden></div>
+      <canvas id="city" aria-label="Interaktive schematische 3D-Stadtansicht"></canvas><div id="officialCityScene" class="official-city-scene" aria-label="Amtliches 3D-Gebäudemodell der Stadt Fürth"></div><div id="officialSceneStatus" class="official-city-status" role="status" hidden></div><div id="cityError" class="city-error" role="status" hidden></div>
       <div class="map-title"><div class="eyebrow">Digitaler Stadtorganismus · Mittelfranken</div><h1>Eine Stadt.<br>Ein Kreislauf.</h1><p>Gestalte ein regeneratives Fürth und beobachte, wie Energie, Wasser, Grün und Mobilität zusammenwirken.</p></div>
-      <div class="map-controls"><button class="chip active" id="networkToggle" aria-pressed="true">◉ Netzwerk</button><button class="chip" id="heatToggle" aria-pressed="false">◉ Wärmebild</button><button class="chip" id="resetCamera">↗ Ansicht</button></div>
+      <div class="map-controls"><button class="chip active" id="networkToggle" aria-pressed="true">◉ Netzwerk</button><button class="chip" id="heatToggle" aria-pressed="false">◉ Wärmebild</button><button class="chip" id="official3dToggle" aria-pressed="false">▧ Amtliches 3D</button><button class="chip" id="resetCamera">↗ Ansicht</button></div>
       <div class="map-legend"><span class="legend-item"><i class="dot" style="background:#e8c86e"></i>Energie</span><span class="legend-item"><i class="dot" style="background:#65bfe4"></i>Wasser</span><span class="legend-item"><i class="dot" style="background:#8dc58d"></i>Grünräume</span><span class="legend-item"><i class="dot" style="background:#d59ae8"></i>Daten</span></div>
       <div class="map-hint">3D-MODELL · VEREINFACHTE STADTGEOGRAPHIE<br>MAUS: DREHEN & ZOOMEN</div>
       <div class="toast" id="toast"></div>
     </section>
     <aside>
       <div class="side-head"><h2>Stadtlabor</h2><span>LIVE-PARAMETER</span></div>
-      <div class="scenario-row">
+      <div class="index-card" style="margin-bottom:12px"><div class="section-title" style="margin-bottom:9px"><strong>Fürth in echten Zahlen</strong><span>AMTLICHE PROGNOSE</span></div><div class="metrics"><div class="metric"><small>Einwohner 2024</small><strong>132.036</strong><em>Personen</em></div><div class="metric"><small>Prognose 2034</small><strong>133.000</strong><em>Personen</em></div></div><p class="hint">Bayerisches Landesamt für Statistik · Regionalisierte Bevölkerungsvorausberechnung. Die Prognose ist keine Garantie.</p><p class="hint"><a href="https://www.statistik.bayern.de/mam/statistik/gebiet_bevoelkerung/demographischer_wandel/demographische_profile/09563.pdf" target="_blank" rel="noreferrer" style="color:#a6e3a1">Quelle: Demographieprofil Fürth (PDF)</a> · <a href="https://geoportal.fuerth.de/server/rest/services/Gebaeude_LoDmax/SceneServer" target="_blank" rel="noreferrer" style="color:#a6e3a1">Amtliches 3D-Gebäudemodell</a></p></div>\n      <div class="scenario-row">
         <button class="scenario active" data-scenario="today">Heute</button>
         <button class="scenario" data-scenario="2030">2030</button>
         <button class="scenario" data-scenario="2040">2040</button>
@@ -98,6 +98,6 @@
     </aside>
   </main>
 </div>
-<script type="module" src="/src/main.js"></script>
+<script src="https://js.arcgis.com/4.32/"></script>\n<script type="module" src="/src/main.js"></script>\n<script type="module" src="./src/official-scene.js"></script>
 </body>
 </html>
