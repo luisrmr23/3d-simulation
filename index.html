@@ -43,15 +43,15 @@
 <div class="app">
   <header>
     <div class="brand"><div class="brand-mark">↗</div><div><strong>FÜRTH 2040</strong><small>DIE REGENERATIVE STADT</small></div></div>
-    <div class="top-right"><span class="live">SIMULATION AKTIV</span><span class="hide-mobile">MODELLVERSION 0.1</span><span>DE · BY</span></div>
+    <div class="top-right"><span class="live">PROTOTYP AKTIV</span><span class="hide-mobile">MODELLVERSION 0.2</span><span>DE · BY</span></div>
   </header>
   <main>
     <section class="stage">
       <canvas id="city" aria-label="Interaktive schematische 3D-Stadtansicht"></canvas><div id="cityError" class="city-error" role="status" hidden></div>
       <div class="map-title"><div class="eyebrow">Digitaler Stadtorganismus · Mittelfranken</div><h1>Eine Stadt.<br>Ein Kreislauf.</h1><p>Gestalte ein regeneratives Fürth und beobachte, wie Energie, Wasser, Grün und Mobilität zusammenwirken.</p></div>
-      <div class="map-controls"><button class="chip active" id="networkToggle">◉ Netzwerk</button><button class="chip" id="heatToggle">◉ Wärmebild</button><button class="chip" id="resetCamera">↗ Ansicht</button></div>
+      <div class="map-controls"><button class="chip active" id="networkToggle" aria-pressed="true">◉ Netzwerk</button><button class="chip" id="heatToggle" aria-pressed="false">◉ Wärmebild</button><button class="chip" id="resetCamera">↗ Ansicht</button></div>
       <div class="map-legend"><span class="legend-item"><i class="dot" style="background:#e8c86e"></i>Energie</span><span class="legend-item"><i class="dot" style="background:#65bfe4"></i>Wasser</span><span class="legend-item"><i class="dot" style="background:#8dc58d"></i>Grünräume</span><span class="legend-item"><i class="dot" style="background:#d59ae8"></i>Daten</span></div>
-      <div class="map-hint">3D-MODELL · VEREINFACHTE STADTGEOgraphie<br>MAUS: DREHEN & ZOOMEN</div>
+      <div class="map-hint">3D-MODELL · VEREINFACHTE STADTGEOGRAPHIE<br>MAUS: DREHEN & ZOOMEN</div>
       <div class="toast" id="toast"></div>
     </section>
     <aside>
